@@ -2,6 +2,11 @@
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
 import sequelize from "./config/database.js";
+import { cleanUploadsDir } from "./utils/cleanUploadsDir.js";
+import { ensureUploadsDirExists } from "./utils/ensureUploadsDirExists.js";
+
+cleanUploadsDir();
+ensureUploadsDirExists();
 
 const app = express();
 
