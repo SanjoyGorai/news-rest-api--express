@@ -1,14 +1,56 @@
 // src/controllers/newsController.js
 import News from "../models/newsModel.js";
+import cloudinary from "../config/cloudinaryConfig.js";
+import { processImage, deleteFile } from "../middlewares/imageProcessor.js";
+import fs from "fs-extra";
+import sharp from "sharp";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { nanoid } from "nanoid";
+
+// Manually resolve __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const uploadsDir = "uploads";
 
 // Create a news article
 export const createNews = async (req, res) => {
   try {
-    const { author, title, imageUrl, content } = req.body;
-    const news = await News.create({ author, title, imageUrl, content });
-    res.status(201).json(news);
+    const { author, title, content } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
+
+    const fileName = `${Date.now()}-${
+      path.parse(req.file.originalname).name
+    }.webp`;
+    const filePath = path.join(uploadsDir, fileName);
+    await sharp(req.file.buffer).webp({ quality: 80 }).toFile(filePath);
+
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "news_images",
+      public_id: `${nanoid()}`,
+      resource_type: "image",
+    });
+
+    // Delete the local file after upload
+    // await deleteFile(processedImagePath);
+    // await deleteFile(file.path); // Also delete the original uploaded file
+
+    // Save news in the database
+    const newNews = await News.create({
+      author,
+      title,
+      imageUrl: result.secure_url,
+      content,
+    });
+
+    res.status(201).json(newNews);
   } catch (error) {
-    res.status(500).json({ message: "Error creating news", error });
+    res.status(500).json({ error_msg: error.message });
   }
 };
 
