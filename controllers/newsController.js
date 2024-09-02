@@ -24,21 +24,17 @@ export const createNews = async (req, res) => {
       return res.status(400).json({ error: "No image uploaded" });
     }
 
-    const fileName = `${Date.now()}-${
-      path.parse(req.file.originalname).name
-    }.webp`;
-    const filePath = path.join(uploadsDir, fileName);
-    await sharp(req.file.buffer).webp({ quality: 80 }).toFile(filePath);
+    const outputFilePath = await processImage(req.file.buffer, uploadsDir);
 
-    const result = await cloudinary.uploader.upload(filePath, {
+    const result = await cloudinary.uploader.upload(outputFilePath, {
       folder: "news_images",
       public_id: `${nanoid()}`,
       resource_type: "image",
     });
 
     // Delete the local file after upload
-    // await deleteFile(processedImagePath);
-    // await deleteFile(file.path); // Also delete the original uploaded file
+    await deleteFile(outputFilePath);
+    await deleteFile(file.path); // Also delete the original uploaded file
 
     // Save news in the database
     const newNews = await News.create({

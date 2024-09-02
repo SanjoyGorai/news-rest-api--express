@@ -14,3 +14,19 @@ export const validateNews = [
     next();
   },
 ];
+
+const validateUser = [
+  body("username")
+    .trim()
+    .notEmpty()
+    .withMessage("Username is required")
+    .isLength({ min: 3, max: 20 })
+    .withMessage("Username must be between 3 and 20 characters"),
+  body("email").trim().isEmail().withMessage("Please enter a valid email"),
+  body("password")
+    .trim()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long"),
+];
+
+export default validateUser;

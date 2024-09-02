@@ -20,7 +20,7 @@ const upload = multer({
   },
 });
 
-// Ensure uploads directory exists
+ 
 const ensureUploadsDirExists = () => {
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);

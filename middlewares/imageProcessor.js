@@ -1,15 +1,11 @@
 import sharp from "sharp";
 import fs from "fs-extra";
 
-// export const processImage = async (filePath, outputDir) => {
-//   const outputFilePath = `${outputDir}/${Date.now()}-output.webp`;
-//   await sharp(filePath).webp({ quality: 80 }).toFile(outputFilePath);
-//   return outputFilePath;
-// };
-export const processImage = async (filePath) => {
+export const processImage = async (filePath, outputDir) => {
   try {
-    const outputBuffer = await sharp(filePath).webp({ quality: 80 }).toBuffer();
-    return outputBuffer;
+    const outputFilePath = `${outputDir}/${Date.now()}-output.webp`;
+    await sharp(filePath).webp({ quality: 80 }).toFile(outputFilePath);
+    return outputFilePath;
   } catch (error) {
     throw new Error("Error processing the image with sharp");
   }
